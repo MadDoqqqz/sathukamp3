@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SopheaknaMP3 Downloader</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #ddeed8;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: #a3c5db;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="url"] {
+            width: calc(100% - 22px); /* Account for padding */
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+        .status-area {
+            margin-top: 25px;
+            padding: 15px;
+            border-radius: 4px;
+            font-size: 1em;
+        }
+        .status-area.hidden {
+            display: none;
+        }
+        .status-area.processing {
+            background-color: #eaf2f8;
+            border: 1px solid #aed6f1;
+            color: #3498db;
+        }
+        .status-area.error {
+            background-color: #fdedec;
+            border: 1px solid #f5b7b1;
+            color: #e74c3c;
+        }
+        .status-area.success a {
+            display: inline-block;
+            background-color: #2ecc71;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+        .status-area.success a:hover {
+            background-color: #27ae60;
+        }
+        .legal-warning {
+            margin-top: 30px;
+            font-size: 0.8em;
+            color: #7f8c8d;
+        }
+    </style>
+    <style>
+    /* Music Notes Animation */
+    .music-bg {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        overflow: hidden;
+        pointer-events: none;
+    }
+    .music-note {
+        position: absolute;
+        font-size: 2.2em;
+        opacity: 0.7;
+        color: #fff;
+        text-shadow:
+            0 0 8px #000,
+            0 0 16px #2ecc71,
+            2px 2px 0 #222;
+        animation: floatNotes 8s linear infinite;
+        font-family: Arial, "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+    }
+    .music-note.hiphop {
+        color: #ffeb3b;
+        text-shadow:
+            0 0 8px #000,
+            0 0 16px #e91e63,
+            2px 2px 0 #222;
+        font-weight: bold;
+        transform: rotate(-15deg);
+    }
+    @keyframes floatNotes {
+        0% {
+            transform: translateY(100vh) scale(1) rotate(-10deg);
+            opacity: 0.8;
+        }
+        80% {
+            opacity: 0.8;
+        }
+        100% {
+            transform: translateY(-10vh) scale(1.2) rotate(15deg);
+            opacity: 0;
+        }
+    }
+    /* Make sure container is above animation */
+    .container {
+        position: relative;
+        z-index: 2;
+    }
+    /* Optional: Hip-hop graffiti style font for title */
+    @import url('https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap');
+    h1 {
+        font-family: 'Permanent Marker', cursive, Arial, sans-serif;
+        letter-spacing: 2px;
+        color: #e91e63;
+        text-shadow: 2px 2px 0 #222, 0 0 12px #fff;
+    }
+    </style>
+</head>
+<body>
+    <div class="music-bg" aria-hidden="true">
+        <span class="music-note" style="left: 10%; animation-delay: 0s;">&#119070;</span>
+        <span class="music-note hiphop" style="left: 25%; font-size:2.8em; animation-delay: 2s;">&#127925;</span>
+        <span class="music-note" style="left: 40%; animation-delay: 1s;">&#119070;</span>
+        <span class="music-note hiphop" style="left: 55%; font-size:2.5em; animation-delay: 3s;">&#127926;</span>
+        <span class="music-note" style="left: 70%; animation-delay: 1.5s;">&#119070;</span>
+        <span class="music-note hiphop" style="left: 85%; font-size:2.2em; animation-delay: 2.5s;">&#127925;</span>
+        <span class="music-note" style="left: 60%; font-size:1.7em; animation-delay: 4s;">&#119070;</span>
+        <span class="music-note hiphop" style="left: 35%; font-size:2.4em; animation-delay: 5s;">&#127926;</span>
+    </div>
+    <div class="container">
+        <h1>Sopheakna MP3 downloader</h1>
+        <p>Enter the URL of the video or audio you want to convert to MP3.</p>
+
+        <label for="audioUrl">Audio/Video URL:</label>
+        <input type="url" id="audioUrl" name="audioUrl" placeholder="e.g., https://www.youtube.com/watch?v=..." required>
+
+        <button id="downloadBtn">Download MP3</button>
+
+        <div id="statusArea" class="status-area hidden">
+            <!-- Status messages will appear here -->
+        </div>
+
+        <div class="legal-warning">
+            <p><strong>Important:</strong> This tool is for oun oun del ot mean luy dak YT premium</p>
+        </div>
+    </div>
+
+    <script>
+        const urlInput = document.getElementById('audioUrl');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const statusArea = document.getElementById('statusArea');
+
+        downloadBtn.addEventListener('click', async () => {
+            const url = urlInput.value.trim();
+            if (!url) {
+                displayStatus('Please enter a valid URL.', 'error');
+                return;
+            }
+
+            // Validate URL format (basic client-side check)
+            try {
+                new URL(url);
+            } catch (_) {
+                displayStatus('Invalid URL format.', 'error');
+                return;
+            }
+
+            displayStatus('Processing your request... This might take a moment.', 'processing');
+            downloadBtn.disabled = true;
+
+            // --- THIS IS WHERE YOU WOULD MAKE AN API CALL TO YOUR BACKEND ---
+            // Example:
+            // try {
+            //     const response = await fetch('/api/download-mp3', {
+            //         method: 'POST',
+            //         headers: {
+            //             'Content-Type': 'application/json',
+            //         },
+            //         body: JSON.stringify({ url: url }),
+            //     });
+            //
+            //     if (!response.ok) {
+            //         const errorData = await response.json();
+            //         throw new Error(errorData.message || `Server error: ${response.status}`);
+            //     }
+            //
+            //     const data = await response.json(); // Assuming backend sends back a download link or file info
+            //     if (data.downloadUrl) {
+            //         displayStatus(`Ready to download! <a href="${data.downloadUrl}" download="${data.fileName || 'audio.mp3'}">Download MP3</a>`, 'success');
+            //     } else if (data.message) { // For other success messages
+            //          displayStatus(data.message, 'success');
+            //     } else {
+            //         displayStatus('Download processed, but no link returned.', 'error');
+            //     }
+            //
+            // } catch (error) {
+            //     console.error('Error during download process:', error);
+            //     displayStatus(`Error: ${error.message}`, 'error');
+            // } finally {
+            //     downloadBtn.disabled = false;
+            // }
+            // --- END OF BACKEND API CALL SIMULATION ---
+
+
+            // --- SIMULATION FOR FRONTEND ONLY ---
+            // Remove this section when you have a real backend
+            console.log(`Simulating backend call for URL: ${url}`);
+            setTimeout(() => {
+                // Simulate a successful download
+                const mockFileName = "my_downloaded_song.mp3";
+                // Use a sample MP3 for preview (replace with backend URL in production)
+                const mockDownloadLink = "#"; // Replace with actual link from backend
+                const mockPreviewMp3 = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"; // Sample MP3
+
+                displayStatus(
+                    `Your MP3 is ready (simulated)! <br>
+                     <a href="${mockDownloadLink}" download="${mockFileName}">Download ${mockFileName}</a>
+                     <br><br>
+                     <audio controls style="width:90%;max-width:350px;outline:none;border-radius:6px;box-shadow:0 2px 8px #0002;">
+                        <source src="${mockPreviewMp3}" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                     </audio>
+                     <div style="font-size:0.9em;color:#888;margin-top:4px;">Preview (demo only)</div>
+                    `,
+                    'success'
+                );
+                // Simulate an error
+                // displayStatus('Simulated error: Could not process the URL.', 'error');
+
+                downloadBtn.disabled = false;
+            }, 3000); // Simulate 3 seconds processing time
+            // --- END OF SIMULATION ---
+        });
+
+        function displayStatus(message, type) {
+            statusArea.innerHTML = message;
+            statusArea.className = 'status-area'; // Reset classes
+            statusArea.classList.add(type); // 'processing', 'error', or 'success'
+            statusArea.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
